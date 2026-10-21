@@ -41,11 +41,22 @@ const MIME_TYPES = {
   '.ico': 'image/x-icon'
 };
 
+/** Extract first JSON object from text (handles markdown fences) */
+function extractJSON(text) {
+  const cleaned = text.replace(/```json/gi, '').replace(/```/g, '').trim();
+  try { return JSON.parse(cleaned); } catch (_) {}
+  const match = cleaned.match(/\{[\s\S]*\}/);
+  if (match) { try { return JSON.parse(match[0]); } catch (_) {} }
+  return null;
+}
+
 async function handleGeminiBriefing(reqBody) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey || apiKey === 'your_gemini_api_key_here') {
+    console.warn('[AI] No API key found — using fallback template plan.');
     return { fallback: true, reason: 'no_key' };
   }
+  console.log(`[AI] Key detected (${apiKey.slice(0, 8)}...). Calling Gemini API...`);
 
   const prompt = `
 You are an Emergency Operations Center (EOC) Disaster Action Officer.
@@ -72,47 +83,66 @@ CRITICAL RESPONSE RULES:
 4. Return raw JSON only, no markdown backticks, no code blocks.
 `;
 
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+  // gemini-3.1-flash-lite: confirmed to support responseMimeType + fast responses
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${apiKey}`;
+  const MAX_RETRIES = 3;
 
-  try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.2,
-          maxOutputTokens: 600,
-          responseMimeType: "application/json"
-        }
-      }),
-      signal: controller.signal
-    });
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
 
-    clearTimeout(timeoutId);
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 0.2,
+            maxOutputTokens: 800,
+            responseMimeType: 'application/json'
+          }
+        }),
+        signal: controller.signal
+      });
 
-    if (!response.ok) {
-      console.warn(`Gemini API returned HTTP ${response.status}`);
-      return { fallback: true, reason: 'api_error' };
+      clearTimeout(timeoutId);
+
+      // Retry on overload/rate-limit
+      if (response.status === 503 || response.status === 429) {
+        console.warn(`[AI] Attempt ${attempt}/${MAX_RETRIES} — HTTP ${response.status} (overloaded). Retrying in 4s...`);
+        if (attempt < MAX_RETRIES) { await new Promise(r => setTimeout(r, 4000)); continue; }
+        return { fallback: true, reason: 'api_error' };
+      }
+
+      if (!response.ok) {
+        const errBody = await response.text().catch(() => '');
+        console.warn(`[AI] Gemini API HTTP ${response.status}: ${errBody.slice(0, 300)}`);
+        return { fallback: true, reason: 'api_error' };
+      }
+
+      console.log('[AI] Gemini responded OK — parsing response...');
+      const data = await response.json();
+      const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!rawText) { return { fallback: true, reason: 'empty_response' }; }
+
+      const parsed = extractJSON(rawText);
+      if (!parsed) {
+        console.warn('[AI] Could not extract JSON from response:', rawText.slice(0, 200));
+        return { fallback: true, reason: 'parse_error' };
+      }
+      return { success: true, data: parsed };
+
+    } catch (err) {
+      clearTimeout(timeoutId);
+      console.warn('[AI] Gemini proxy call error/timeout:', err.message);
+      if (attempt < MAX_RETRIES && err.name !== 'AbortError') {
+        await new Promise(r => setTimeout(r, 3000)); continue;
+      }
+      return { fallback: true, reason: err.name === 'AbortError' ? 'timeout' : 'api_error' };
     }
-
-    const data = await response.json();
-    const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!rawText) {
-      return { fallback: true, reason: 'empty_response' };
-    }
-
-    const cleaned = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
-    const parsed = JSON.parse(cleaned);
-
-    return { success: true, data: parsed };
-  } catch (err) {
-    clearTimeout(timeoutId);
-    console.warn('Gemini proxy call error/timeout:', err.message);
-    return { fallback: true, reason: err.name === 'AbortError' ? 'timeout' : 'api_error' };
   }
+  return { fallback: true, reason: 'api_error' };
 }
 
 const server = http.createServer(async (req, res) => {

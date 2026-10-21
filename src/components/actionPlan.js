@@ -135,30 +135,38 @@ export class ActionPlanComponent {
 
     try {
       const res = await fetchAIBriefing(scenarioId, rankedCommunities, this.roads, allocationResult);
+      console.log('[ActionPlan] Server response:', JSON.stringify(res, null, 2));
 
       if (res?.fallback) {
         // AI unavailable (no key, timeout, or ?ai=off hook)
+        console.warn('[ActionPlan] Fallback triggered, reason:', res.reason);
         const fallbackPlan = generateTemplatePlan(rankedCommunities, allocationResult, this.roads, scenarioId, 'unavailable');
         this.renderPlan(fallbackPlan);
         return;
       }
 
       if (res?.success && res.data) {
+        console.log('[ActionPlan] AI data received, running guardrail validation...');
+        console.log('[ActionPlan] Raw AI data:', JSON.stringify(res.data, null, 2));
         // Validate against strict guardrails & hydrate placeholders
         const validation = validateAndHydrateBriefing(res.data, rankedCommunities, this.roads, allocationResult);
 
         if (validation.valid && validation.hydrated) {
           // Success! Render validated AI action plan
+          console.log('[ActionPlan] Guardrail PASSED — rendering AI plan.');
           this.renderPlan(validation.hydrated);
           return;
         } else {
-          console.warn('AI briefing rejected by guardrail:', validation.reason);
+          console.warn('[ActionPlan] Guardrail REJECTED. Reason:', validation.reason);
+          console.log('[ActionPlan] Ranked community IDs:', rankedCommunities.map(c => `${c.communityId}(rank${c.rank})`));
           // AI output failed validation: trigger explicit validation failed fallback
           const fallbackPlan = generateTemplatePlan(rankedCommunities, allocationResult, this.roads, scenarioId, 'validation_failed');
           this.renderPlan(fallbackPlan);
           return;
         }
       }
+
+      console.warn('[ActionPlan] Unexpected response shape:', res);
 
       // Default fallback
       const fallbackPlan = generateTemplatePlan(rankedCommunities, allocationResult, this.roads, scenarioId, 'unavailable');
