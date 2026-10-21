@@ -29,7 +29,7 @@ Build mode: fast
   Learner check: Open `http://localhost:3000`, switch scenarios between River Flood and Cyclone, and verify the SVG map updates road statuses and risk colors.
   Commit: `Add server, EOC dashboard layout, controls, and interactive SVG map`
 
-- [ ] **3. Triage Ranking, "Why This Ranking?" Expander, and Allocation Shortfall Table**
+- [x] **3. Triage Ranking, "Why This Ranking?" Expander, and Allocation Shortfall Table**
   Becomes usable: Live data tables showing ranked communities with factor point breakdowns and resource allocations with shortfall badges, synchronized bidirectionally with the SVG map.
   Why now: Completes the full deterministic operator loop. Clicking a map node or table row highlights across panels and reveals the exact mathematical justification.
   PRD ref: `prd.md > Risk Scoring & "Why This Ranking?" Factor Breakdown`, `prd.md > Priority Resource Allocation & Shortfall Tracking`, and `prd.md > Features and Behavior (Cross-Panel Synchronization)`
