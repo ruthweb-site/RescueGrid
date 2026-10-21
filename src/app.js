@@ -10,6 +10,7 @@ import { ControlsComponent } from './components/controls.js';
 import { MapComponent } from './components/map.js';
 import { TriageTableComponent } from './components/triageTable.js';
 import { AllocationTableComponent } from './components/allocationTable.js';
+import { ActionPlanComponent } from './components/actionPlan.js';
 
 class RescueGridApp {
   constructor() {
@@ -179,8 +180,16 @@ class RescueGridApp {
       });
     }
 
-    // Render initial action plan placeholder
-    this.renderInitialActionPlan();
+    // 5. Action Plan Component
+    const actionPlanContainer = document.getElementById('action-plan-container');
+    const badgeEl = document.getElementById('action-plan-badge');
+    if (actionPlanContainer && badgeEl) {
+      this.actionPlanComponent = new ActionPlanComponent(actionPlanContainer, badgeEl, {
+        roads: this.districtData.roads
+      });
+      // Request initial briefing
+      this.actionPlanComponent.requestBriefing(this.activeScenarioId, this.rankedCommunities, this.allocationResult);
+    }
   }
 
   renderInitialActionPlan() {

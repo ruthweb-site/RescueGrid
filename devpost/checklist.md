@@ -39,7 +39,7 @@ Build mode: fast
   Learner check: Open browser, click a community node on the map, verify its triage row highlights, expand "Why this ranking?", and inspect the shortfall table.
   Commit: `Add triage ranking table, factor expander, and allocation shortfall view`
 
-- [ ] **4. AI Action Briefing Proxy, Variable Hydration, Failure Test Hooks, and Fallback Engine**
+- [x] **4. AI Action Briefing Proxy, Variable Hydration, Failure Test Hooks, and Fallback Engine**
   Becomes usable: The emergency action plan panel generates an AI operational brief strictly validated and hydrated with computed numbers, with test hooks (`?ai=off`, `?ai=bad`) for demoing fallbacks, unit tests for validation guardrails, and project README.
   Why now: Connects LLM synthesis to the deterministic data while guaranteeing zero hallucinated quantities and enabling foolproof demonstration of guardrails.
   PRD ref: `prd.md > AI Emergency Action Plan & Fallback Guardrail`
@@ -51,7 +51,7 @@ Build mode: fast
 
 ## Hands-on Checkpoints
 
-- [ ] Early usable behavior explored — Slice 3 (Full deterministic console with interactive map and triage tables) — **STOP FOR LEARNER**
+- [x] Early usable behavior explored — Slice 3 (Full deterministic console with interactive map and triage tables) — **STOP FOR LEARNER**
 - [ ] Final kick-the-tires exploration and feedback completed — Slice 4 (Complete app with AI briefing, guardrail demo hooks, and README)
 
 ## Final Review

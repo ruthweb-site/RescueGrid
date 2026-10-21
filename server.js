@@ -41,18 +41,127 @@ const MIME_TYPES = {
   '.ico': 'image/x-icon'
 };
 
-const server = http.createServer((req, res) => {
+async function handleGeminiBriefing(reqBody) {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey || apiKey === 'your_gemini_api_key_here') {
+    return { fallback: true, reason: 'no_key' };
+  }
+
+  const prompt = `
+You are an Emergency Operations Center (EOC) Disaster Action Officer.
+Generate an actionable emergency response briefing for the simulated disaster scenario.
+
+District Context:
+${JSON.stringify(reqBody, null, 2)}
+
+CRITICAL RESPONSE RULES:
+1. Return ONLY valid JSON matching this exact structure:
+{
+  "immediate": [
+    { "communityId": "c1", "action": "Priority #1: Dispatch {{c1.food}} food packets, {{c1.water}} water units, and {{c1.medical}} medical kits to support {{c1.vulnerable}} vulnerable residents." }
+  ],
+  "routeAlerts": [
+    { "roadId": "r1", "advice": "Route severed. Reroute logistics via secondary corridors." }
+  ],
+  "watchpoints": [
+    "District medical shortfall requires second-tier reserve mobilization."
+  ]
+}
+2. The "immediate" array MUST contain the top 3 or 4 ranked communities in STRICT DESCENDING RANK ORDER (Rank #1 first, then Rank #2, etc.).
+3. NEVER write raw inventory numbers or counts for resources! You MUST ONLY refer to quantities using placeholders of the exact form {{communityId.food}}, {{communityId.water}}, {{communityId.medical}}, {{communityId.vulnerable}}.
+4. Return raw JSON only, no markdown backticks, no code blocks.
+`;
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+  try {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: 0.2,
+          maxOutputTokens: 600,
+          responseMimeType: "application/json"
+        }
+      }),
+      signal: controller.signal
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      console.warn(`Gemini API returned HTTP ${response.status}`);
+      return { fallback: true, reason: 'api_error' };
+    }
+
+    const data = await response.json();
+    const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!rawText) {
+      return { fallback: true, reason: 'empty_response' };
+    }
+
+    const cleaned = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+    const parsed = JSON.parse(cleaned);
+
+    return { success: true, data: parsed };
+  } catch (err) {
+    clearTimeout(timeoutId);
+    console.warn('Gemini proxy call error/timeout:', err.message);
+    return { fallback: true, reason: err.name === 'AbortError' ? 'timeout' : 'api_error' };
+  }
+}
+
+const server = http.createServer(async (req, res) => {
   const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
   let pathname = parsedUrl.pathname;
 
-  // API endpoint stub (Slice 4 wires full Gemini call)
+  // POST /api/brief Proxy with Demo Failure Test Hooks
   if (pathname === '/api/brief' && req.method === 'POST') {
     let body = '';
     req.on('data', chunk => { body += chunk; });
-    req.on('end', () => {
-      // By default return fallback signal if key missing or test hook triggered
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ fallback: true, reason: 'ai_stub' }));
+    req.on('end', async () => {
+      try {
+        const payload = JSON.parse(body || '{}');
+        const hook = payload.testHook || parsedUrl.searchParams.get('ai');
+
+        // Test Hook 1: Force AI Unavailable fallback
+        if (hook === 'off') {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ fallback: true, reason: 'ai_off_hook' }));
+          return;
+        }
+
+        // Test Hook 2: Force AI Output Failed Validation (injects unallowlisted invented digit and rank violation)
+        if (hook === 'bad') {
+          const badMock = {
+            immediate: [
+              { communityId: 'c8', action: 'Priority dispatch with 99999 invented emergency crates to c8.' },
+              { communityId: 'c1', action: 'Secondary dispatch out of rank order.' }
+            ],
+            routeAlerts: [
+              { roadId: 'r1', advice: 'Route r1 is completely submerged.' }
+            ],
+            watchpoints: [
+              'Invented watchpoint with ungrounded 8888 figure.'
+            ]
+          };
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: true, data: badMock }));
+          return;
+        }
+
+        // Standard live execution via Gemini API
+        const result = await handleGeminiBriefing(payload);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(result));
+      } catch (err) {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ fallback: true, reason: 'request_error' }));
+      }
     });
     return;
   }
@@ -62,7 +171,6 @@ const server = http.createServer((req, res) => {
     pathname = '/index.html';
   }
 
-  // Sanitize path to prevent directory traversal
   const safePath = path.normalize(path.join(__dirname, pathname));
   if (!safePath.startsWith(__dirname)) {
     res.writeHead(403, { 'Content-Type': 'text/plain' });
