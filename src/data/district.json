@@ -1,0 +1,124 @@
+{
+  "districtName": "Kaveri Delta District (Simulated)",
+  "scenarios": {
+    "flood": {
+      "id": "flood",
+      "name": "River Flood Level-4",
+      "hazardType": "Flood",
+      "summary": "Severe monsoon surge causing northern river embankment breach, cutting river valley access roads.",
+      "defaultStock": {
+        "food": 850,
+        "water": 1400,
+        "medical": 180
+      }
+    },
+    "cyclone": {
+      "id": "cyclone",
+      "name": "Cyclone Vardah Landfall",
+      "hazardType": "Cyclone",
+      "summary": "Category 3 coastal cyclone with 130 km/h wind gusts inundating eastern coastal communities.",
+      "defaultStock": {
+        "food": 900,
+        "water": 1500,
+        "medical": 210
+      }
+    }
+  },
+  "depot": {
+    "id": "depot-main",
+    "name": "Central District Relief Depot",
+    "coords": [400, 260]
+  },
+  "roads": [
+    { "id": "r1", "name": "Northern Valley Highway", "from": "depot-main", "to": "c1", "status": { "flood": "cut", "cyclone": "open" } },
+    { "id": "r2", "name": "East Coast Expressway", "from": "depot-main", "to": "c2", "status": { "flood": "open", "cyclone": "cut" } },
+    { "id": "r3", "name": "Central Ridge Arterial", "from": "depot-main", "to": "c3", "status": { "flood": "open", "cyclone": "open" } },
+    { "id": "r4", "name": "Delta Marsh Link Road", "from": "c3", "to": "c4", "status": { "flood": "cut", "cyclone": "at_risk" } },
+    { "id": "r5", "name": "Southern Bypass", "from": "depot-main", "to": "c5", "status": { "flood": "at_risk", "cyclone": "open" } },
+    { "id": "r6", "name": "Western Hill Corridor", "from": "depot-main", "to": "c6", "status": { "flood": "open", "cyclone": "open" } },
+    { "id": "r7", "name": "Fisheries Wharf Route", "from": "c2", "to": "c7", "status": { "flood": "at_risk", "cyclone": "cut" } },
+    { "id": "r8", "name": "Upland Forest Track", "from": "c6", "to": "c8", "status": { "flood": "open", "cyclone": "at_risk" } }
+  ],
+  "communities": [
+    {
+      "id": "c1",
+      "name": "Alathur Basin",
+      "coords": [360, 90],
+      "population": 1400,
+      "vulnerable": 420,
+      "accessRoadId": "r1",
+      "depotDistanceKm": 18,
+      "scenarioExposure": { "flood": 39, "cyclone": 12 }
+    },
+    {
+      "id": "c2",
+      "name": "Nagore Coastal Hamlet",
+      "coords": [680, 220],
+      "population": 2100,
+      "vulnerable": 580,
+      "accessRoadId": "r2",
+      "depotDistanceKm": 28,
+      "scenarioExposure": { "flood": 14, "cyclone": 38 }
+    },
+    {
+      "id": "c3",
+      "name": "Melur Township",
+      "coords": [420, 210],
+      "population": 3200,
+      "vulnerable": 650,
+      "accessRoadId": "r3",
+      "depotDistanceKm": 6,
+      "scenarioExposure": { "flood": 22, "cyclone": 20 }
+    },
+    {
+      "id": "c4",
+      "name": "Kollidam Delta Colony",
+      "coords": [540, 160],
+      "population": 950,
+      "vulnerable": 310,
+      "accessRoadId": "r4",
+      "depotDistanceKm": 22,
+      "scenarioExposure": { "flood": 37, "cyclone": 26 }
+    },
+    {
+      "id": "c5",
+      "name": "Perambur South",
+      "coords": [390, 420],
+      "population": 1800,
+      "vulnerable": 390,
+      "accessRoadId": "r5",
+      "depotDistanceKm": 16,
+      "scenarioExposure": { "flood": 28, "cyclone": 18 }
+    },
+    {
+      "id": "c6",
+      "name": "Thiruvallur West",
+      "coords": [180, 270],
+      "population": 1650,
+      "vulnerable": 340,
+      "accessRoadId": "r6",
+      "depotDistanceKm": 24,
+      "scenarioExposure": { "flood": 16, "cyclone": 15 }
+    },
+    {
+      "id": "c7",
+      "name": "Karaikal Port Enclave",
+      "coords": [720, 360],
+      "population": 1250,
+      "vulnerable": 360,
+      "accessRoadId": "r7",
+      "depotDistanceKm": 34,
+      "scenarioExposure": { "flood": 18, "cyclone": 36 }
+    },
+    {
+      "id": "c8",
+      "name": "Sirumalai Foothills",
+      "coords": [120, 140],
+      "population": 800,
+      "vulnerable": 190,
+      "accessRoadId": "r8",
+      "depotDistanceKm": 31,
+      "scenarioExposure": { "flood": 10, "cyclone": 14 }
+    }
+  ]
+}
