@@ -12,6 +12,9 @@ In disaster management, decisions must be transparent, repeatable, and auditable
 2. **Generative Synthesis (AI & Guardrails)**: The AI does not compute numbers—it synthesizes human-actionable emergency directives. The model outputs structured JSON with template placeholders (e.g. `{{c1.food}}`), which the client validates for rank order and digit allow-lists before hydrating with exact computed figures.
 3. **Automated Fallbacks**: If the AI API is unavailable, times out, or fails validation (e.g., attempts to invent numbers or violates rank order), the console instantly renders a deterministic template-based action plan with clear audit badges.
 
+### System Architecture
+![RescueGrid System Architecture](devpost/architecture-diagram.png)
+
 ---
 
 ## Quickstart & How to Run
