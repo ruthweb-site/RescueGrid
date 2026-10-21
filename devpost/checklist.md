@@ -52,22 +52,24 @@ Build mode: fast
 ## Hands-on Checkpoints
 
 - [x] Early usable behavior explored — Slice 3 (Full deterministic console with interactive map and triage tables) — **STOP FOR LEARNER**
-- [ ] Final kick-the-tires exploration and feedback completed — Slice 4 (Complete app with AI briefing, guardrail demo hooks, and README)
+- [x] Final kick-the-tires exploration and feedback completed — Slice 4 (Complete app with AI briefing, guardrail demo hooks, and README)
 
 ## Final Review
 
-- [ ] Final review complete — feedback resolved and learner confirms ready to ship
+- [x] Final review complete — feedback resolved and learner confirms ready to ship
 
 ## Code Tour and App Map
 
-- [ ] Learning activity complete — guided route, focused alternative, prior practice connected, or brief recap
-- [ ] Optional edit and transfer reflection addressed — offered/declined/already covered/not applicable as appropriate
-- [ ] `devpost/app-map.html` generated from finished code, checked, and shown, including a project-grounded practice to reuse
+- [x] Learning activity complete — guided route, focused alternative, prior practice connected, or brief recap
+- [x] Optional edit and transfer reflection addressed — offered/declined/already covered/not applicable as appropriate
+- [x] `devpost/app-map.html` generated from finished code, checked, and shown, including a project-grounded practice to reuse
 
-Activity and evidence: 
-Route and stops: 
-Edit outcome: 
-Reflection: 
-Activity mode: 
+Activity and evidence: Architecture map and data flow diagram generated in devpost/app-map.html; deterministic scoring & allocation engines verified with automated unit tests (npm test) and live browser test.
+Route and stops: src/engine/scoring.js (calculateCommunityRisk) -> src/engine/allocation.js (allocateResources) -> server.js (/api/brief) & src/services/aiBriefing.js.
+Edit outcome: Handled Gemini 503 high-demand errors by implementing retry backoff logic and switching to gemini-3.1-flash-lite in server.js.
+Reflection: Reusable practice: decoupling deterministic calculation engines from LLM natural language synthesis.
+Activity mode: reference route and standalone app-map.
 
 ## Revisions
+
+None. All 4 slices built and verified.
