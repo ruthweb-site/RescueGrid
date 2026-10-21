@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RescueGrid — Scope Plan Companion</title>
+  <style>
+    :root {
+      --bg-primary: #0a0f1d;
+      --bg-surface: #111827;
+      --bg-surface-elevated: #1f2937;
+      --border-color: #374151;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --accent-teal: #0d9488;
+      --accent-teal-hover: #14b8a6;
+      --accent-cyan: #06b6d4;
+      --risk-low: #10b981;
+      --risk-med: #f59e0b;
+      --risk-high: #f97316;
+      --risk-crit: #ef4444;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      line-height: 1.6;
+      padding: 2rem 1.5rem 4rem;
+    }
+
+    .container {
+      max-width: 1040px;
+      margin: 0 auto;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 1.5rem;
+      margin-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .title-group h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .status-badge {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      font-weight: 600;
+    }
+
+    .eoc-banner {
+      background: rgba(13, 148, 136, 0.12);
+      border-left: 4px solid var(--accent-teal);
+      border-radius: 4px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 2rem;
+      font-size: 0.875rem;
+      color: #99f6e4;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card-title::before {
+      content: "";
+      display: inline-block;
+      width: 6px;
+      height: 16px;
+      background: var(--accent-cyan);
+      border-radius: 2px;
+    }
+
+    /* Diagram Styles */
+    .diagram-container {
+      background: #060913;
+      border: 1px solid #1e293b;
+      border-radius: 8px;
+      padding: 1.5rem;
+      overflow-x: auto;
+      margin: 1.5rem 0;
+    }
+
+    svg.pipeline-diagram {
+      width: 100%;
+      min-width: 760px;
+      height: auto;
+      display: block;
+    }
+
+    /* Interactive reveals / tabs */
+    .boundary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .boundary-card {
+      background: var(--bg-surface-elevated);
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+    }
+
+    .boundary-header {
+      padding: 0.85rem 1.25rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      user-select: none;
+    }
+
+    .header-in { background: rgba(16, 185, 129, 0.12); color: #34d399; border-bottom: 1px solid rgba(16, 185, 129, 0.2); }
+    .header-later { background: rgba(245, 158, 11, 0.12); color: #fbbf24; border-bottom: 1px solid rgba(245, 158, 11, 0.2); }
+    .header-cut { background: rgba(239, 68, 68, 0.12); color: #f87171; border-bottom: 1px solid rgba(239, 68, 68, 0.2); }
+
+    .boundary-body {
+      padding: 1.25rem;
+      font-size: 0.9rem;
+    }
+
+    .boundary-body ul {
+      list-style-type: none;
+    }
+
+    .boundary-body li {
+      position: relative;
+      padding-left: 1.25rem;
+      margin-bottom: 0.6rem;
+      color: #d1d5db;
+    }
+
+    .boundary-body li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: var(--accent-cyan);
+      font-weight: bold;
+    }
+
+    /* Design Direction Grid */
+    .specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .spec-item {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      padding: 1rem;
+      border-radius: 6px;
+    }
+
+    .spec-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent-cyan);
+      font-family: var(--font-mono);
+      margin-bottom: 0.35rem;
+    }
+
+    .spec-value {
+      font-size: 0.9rem;
+      color: #e2e8f0;
+    }
+
+    /* Risk Color Palette Preview with Accessibility dual-coding */
+    .palette-strip {
+      display: flex;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 0.5rem;
+      height: 24px;
+    }
+    .palette-box { flex: 1; text-align: center; font-size: 10px; line-height: 24px; font-weight: bold; color: #000; font-family: var(--font-mono); }
+
+    .action-row {
+      margin-top: 2rem;
+      padding: 1.25rem;
+      background: #091325;
+      border: 1px solid #1e3a5f;
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .canonical-note {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .canonical-note code {
+      font-family: var(--font-mono);
+      color: #93c5fd;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="title-group">
+      <h1>RescueGrid <span class="status-badge">Scope Approved</span></h1>
+      <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.25rem;">
+        Simulated Disaster Response Decision-Support Console
+      </p>
+    </div>
+  </header>
+
+  <div class="eoc-banner">
+    <div><strong>MISSION BRIEF:</strong> Deterministic risk scoring and supply triage paired with auditable, hallucination-proof AI action directives.</div>
+    <div style="font-family: var(--font-mono); font-size: 0.75rem;">SIMULATED DATA ONLY</div>
+  </div>
+
+  <!-- Unique Kernel -->
+  <div class="card">
+    <div class="card-title">The Unique Kernel</div>
+    <p style="font-size: 1.05rem; color: #e5e7eb;">
+      <strong>The deterministic, auditable boundary between math and AI:</strong> risk scoring and resource allocation are computed strictly via transparent, rule-based algorithms, while the AI only synthesizes, explains, and drafts human-readable emergency directives.
+    </p>
+    <p style="color: var(--text-muted); margin-top: 0.5rem; font-size: 0.9rem;">
+      The AI's narrative plan is validated against the computed numbers so it cannot hallucinate or invent inventory. If validation fails or the API times out, an automated <strong>template-based fallback plan</strong> is seamlessly displayed—guaranteeing the plan never contradicts the numbers.
+    </p>
+  </div>
+
+  <!-- Pipeline Diagram -->
+  <div class="card">
+    <div class="card-title">Architecture Pipeline & Verification Guardrail</div>
+    <div class="diagram-container">
+      <svg class="pipeline-diagram" viewBox="0 0 920 200" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 10 5 L 0 9 z" fill="#64748b" />
+          </marker>
+        </defs>
+
+        <!-- Step 1: Input -->
+        <rect x="10" y="35" width="160" height="120" rx="8" fill="#1e293b" stroke="#334155" stroke-width="2"/>
+        <text x="90" y="65" text-anchor="middle" fill="#38bdf8" font-size="13" font-weight="bold">1. Scenario & Sliders</text>
+        <text x="90" y="90" text-anchor="middle" fill="#94a3b8" font-size="11">River Flood / Cyclone</text>
+        <text x="90" y="110" text-anchor="middle" fill="#94a3b8" font-size="11">Food, Water, Meds</text>
+        <text x="90" y="130" text-anchor="middle" fill="#cbd5e1" font-size="11">8 Communities (JSON)</text>
+
+        <!-- Arrow 1 -->
+        <line x1="170" y1="95" x2="215" y2="95" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+
+        <!-- Step 2: Deterministic Engine -->
+        <rect x="220" y="25" width="200" height="140" rx="8" fill="#0f172a" stroke="#0d9488" stroke-width="2"/>
+        <text x="320" y="55" text-anchor="middle" fill="#2dd4bf" font-size="13" font-weight="bold">2. Deterministic Core</text>
+        <text x="320" y="80" text-anchor="middle" fill="#e2e8f0" font-size="11">Multi-factor Risk Score</text>
+        <text x="320" y="98" text-anchor="middle" fill="#64748b" font-size="10">(Exposure, Pop, Vulnerable, Road)</text>
+        <text x="320" y="122" text-anchor="middle" fill="#e2e8f0" font-size="11">Greedy Priority Allocation</text>
+        <text x="320" y="140" text-anchor="middle" fill="#64748b" font-size="10">(Depot stock assigned in order)</text>
+
+        <!-- Split Arrows -->
+        <line x1="420" y1="75" x2="470" y2="55" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+        <line x1="420" y1="115" x2="470" y2="135" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+
+        <!-- Step 3A: Visual SVG Map & Triage -->
+        <rect x="475" y="20" width="195" height="75" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+        <text x="572" y="45" text-anchor="middle" fill="#38bdf8" font-size="12" font-weight="bold">Offline Custom SVG Map</text>
+        <text x="572" y="65" text-anchor="middle" fill="#94a3b8" font-size="10.5">Dual-coded pins (Color + Icon)</text>
+        <text x="572" y="82" text-anchor="middle" fill="#94a3b8" font-size="10.5">Ranked Triage & Supply Table</text>
+
+        <!-- Step 3B: AI Action Plan & Fallback -->
+        <rect x="475" y="105" width="195" height="80" rx="8" fill="#1e1b4b" stroke="#6366f1" stroke-width="1.5"/>
+        <text x="572" y="128" text-anchor="middle" fill="#a5b4fc" font-size="12" font-weight="bold">AI Emergency Plan</text>
+        <text x="572" y="148" text-anchor="middle" fill="#cbd5e1" font-size="10">Deployment order & road alerts</text>
+        <text x="572" y="165" text-anchor="middle" fill="#f59e0b" font-size="10">+ Template Fallback Engine</text>
+
+        <!-- Arrow into Verification Loop -->
+        <line x1="670" y1="145" x2="720" y2="145" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+
+        <!-- Step 4: Verification Guardrail -->
+        <rect x="725" y="55" width="170" height="90" rx="8" fill="#064e3b" stroke="#10b981" stroke-width="1.5"/>
+        <text x="810" y="85" text-anchor="middle" fill="#6ee7b7" font-size="11" font-weight="bold">Auditable Output</text>
+        <text x="810" y="105" text-anchor="middle" fill="#d1fae5" font-size="10">Quantity Check vs Math</text>
+        <text x="810" y="122" text-anchor="middle" fill="#a7f3d0" font-size="9.5">Fallback on mismatch</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- POC Boundary: In / Later / Cut -->
+  <div class="card">
+    <div class="card-title">POC Scope Boundaries</div>
+    <div class="boundary-grid">
+      <!-- IN -->
+      <div class="boundary-card">
+        <div class="boundary-header header-in">
+          <span>NOW (PoC Target: 2–4 Hours)</span>
+          <span style="font-size: 0.75rem;">APPROVED</span>
+        </div>
+        <div class="boundary-body">
+          <ul>
+            <li>Two scenarios: River Flood & Cyclone Landfall</li>
+            <li>Fictional district with 8 distinct communities</li>
+            <li>Food packets, drinking water, and medical kits</li>
+            <li>In-memory static JSON dataset</li>
+            <li>Deterministic multi-factor risk scoring formula</li>
+            <li>Greedy priority resource allocation</li>
+            <li><strong>Custom SVG district map</strong> (100% offline, zero rate limits, instantaneous rendering, zero network demo failure risk)</li>
+            <li>AI emergency action plan with strict numerical validation</li>
+            <li><strong>Template-based fallback plan</strong> if AI call fails or mismatches computed allocation</li>
+            <li><strong>Accessible indicators:</strong> dual-encoded (color + icon/label) for color-blind accessibility</li>
+            <li>Prominent "Simulated Data" banner</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- LATER -->
+      <div class="boundary-card">
+        <div class="boundary-header header-later">
+          <span>LATER (Next Iterations)</span>
+          <span style="font-size: 0.75rem;">BACKLOG</span>
+        </div>
+        <div class="boundary-body">
+          <ul>
+            <li>Real external data feeds (IMD, telemetry)</li>
+            <li>Multi-district coverage & cross-district depots</li>
+            <li>PDF export of official emergency briefs</li>
+            <li>Custom scenario builder & community editor</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- CUT -->
+      <div class="boundary-card">
+        <div class="boundary-header header-cut">
+          <span>EXPLICITLY CUT</span>
+          <span style="font-size: 0.75rem;">OUT</span>
+        </div>
+        <div class="boundary-body">
+          <ul>
+            <li>Live weather APIs & real shapefile GIS ingest</li>
+            <li>Leaflet with external tile servers</li>
+            <li>User auth & role-based permissions</li>
+            <li>Database & persistence layer</li>
+            <li>Multi-user websockets & real-time sync</li>
+            <li>Mobile responsive layout (desktop EOC console only)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Design Direction -->
+  <div class="card">
+    <div class="card-title">Design Direction & Aesthetics</div>
+    <div class="specs-grid">
+      <div class="spec-item">
+        <div class="spec-label">Aesthetic & Mood</div>
+        <div class="spec-value">Emergency Operations Center (EOC). Serious, clean, high-contrast, zero clutter.</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-label">Color & Accessibility</div>
+        <div class="spec-value">Navy/slate base, teal actions. Red reserved for critical. Dual-coded with icons/labels for color-blind operators.</div>
+        <div class="palette-strip">
+          <div class="palette-box" style="background: #10b981;">LOW [✓]</div>
+          <div class="palette-box" style="background: #f59e0b;">MED [▲]</div>
+          <div class="palette-box" style="background: #f97316;">HIGH [!]</div>
+          <div class="palette-box" style="background: #ef4444; color: #fff;">CRIT [✖]</div>
+        </div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-label">Typography</div>
+        <div class="spec-value">Inter / IBM Plex Sans. Tabular numerals for data and allocation tables.</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-label">Layout Architecture</div>
+        <div class="spec-value">Controls (Left) | Interactive SVG Map (Center) | Triage Table (Right) | AI Action Plan (Bottom).</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Canonical link -->
+  <div class="action-row">
+    <div class="canonical-note">
+      Canonical Document: <code>devpost/scope.md</code> &bull; Companion: <code>devpost/scope.html</code>
+    </div>
+    <div style="font-size: 0.85rem; color: #34d399; font-weight: 600;">
+      ✓ Scope Approved
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

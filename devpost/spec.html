@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RescueGrid — Technical Spec Companion</title>
+  <style>
+    :root {
+      --bg-primary: #0a0f1d;
+      --bg-surface: #111827;
+      --bg-surface-elevated: #1f2937;
+      --border-color: #374151;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --accent-teal: #0d9488;
+      --accent-teal-hover: #14b8a6;
+      --accent-cyan: #06b6d4;
+      --risk-low: #10b981;
+      --risk-med: #f59e0b;
+      --risk-high: #f97316;
+      --risk-crit: #ef4444;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      line-height: 1.6;
+      padding: 2rem 1.5rem 4rem;
+    }
+    .container { max-width: 1100px; margin: 0 auto; }
+    
+    header {
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 1.5rem;
+      margin-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .title-group h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .status-badge {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      font-weight: 600;
+    }
+    .eoc-banner {
+      background: rgba(13, 148, 136, 0.12);
+      border-left: 4px solid var(--accent-teal);
+      border-radius: 4px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 2rem;
+      font-size: 0.875rem;
+      color: #99f6e4;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .card-title::before {
+      content: "";
+      display: inline-block;
+      width: 6px;
+      height: 16px;
+      background: var(--accent-cyan);
+      border-radius: 2px;
+    }
+
+    /* Diagram Styles */
+    .diagram-container {
+      background: #060913;
+      border: 1px solid #1e293b;
+      border-radius: 8px;
+      padding: 1.5rem;
+      overflow-x: auto;
+      margin: 1rem 0;
+    }
+    svg.arch-diagram {
+      width: 100%;
+      min-width: 860px;
+      height: auto;
+      display: block;
+    }
+
+    /* File Tree Box */
+    .file-tree {
+      background: #090e1a;
+      border: 1px solid #1e293b;
+      border-radius: 6px;
+      padding: 1.25rem;
+      font-family: var(--font-mono);
+      font-size: 0.825rem;
+      color: #93c5fd;
+      line-height: 1.6;
+      overflow-x: auto;
+    }
+
+    /* Component Grid */
+    .component-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.25rem;
+      margin-top: 1rem;
+    }
+    .component-card {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 1.25rem;
+    }
+    .component-card h3 {
+      font-size: 0.95rem;
+      color: #38bdf8;
+      margin-bottom: 0.35rem;
+      font-family: var(--font-mono);
+    }
+    .component-ref {
+      font-size: 0.75rem;
+      color: #34d399;
+      font-family: var(--font-mono);
+      margin-bottom: 0.65rem;
+    }
+    .component-card p {
+      font-size: 0.85rem;
+      color: #d1d5db;
+      line-height: 1.5;
+    }
+
+    .badge-pill {
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      display: inline-block;
+      font-weight: bold;
+    }
+    .badge-green { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; }
+    .badge-amber { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; }
+
+    .action-row {
+      margin-top: 2rem;
+      padding: 1.25rem;
+      background: #091325;
+      border: 1px solid #1e3a5f;
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="title-group">
+      <h1>RescueGrid <span class="status-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border-color: rgba(16, 185, 129, 0.3);">Spec Approved</span></h1>
+      <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.25rem;">
+        Technical Architecture & Component Blueprint
+      </p>
+    </div>
+  </header>
+
+  <div class="eoc-banner">
+    <div><strong>TECHNICAL STACK:</strong> Zero-dependency Node.js server + Vanilla ES modules + Built-in node:test runner + Placeholder-hydrated LLM briefing.</div>
+    <div style="font-family: var(--font-mono); font-size: 0.75rem;">OFFLINE-READY &bull; ZERO BUILD STEP</div>
+  </div>
+
+  <!-- End-to-End System Architecture Diagram -->
+  <div class="card">
+    <div class="card-title">System Architecture & Data Flow</div>
+    <div class="diagram-container">
+      <svg class="arch-diagram" viewBox="0 0 940 240" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 10 5 L 0 9 z" fill="#64748b" />
+          </marker>
+        </defs>
+
+        <!-- BROWSER RUNTIME BOUNDARY -->
+        <rect x="10" y="10" width="650" height="220" rx="8" fill="#0b1329" stroke="#1e3a5f" stroke-dasharray="4" stroke-width="1.5"/>
+        <text x="25" y="30" fill="#60a5fa" font-size="11" font-family="monospace" font-weight="bold">BROWSER RUNTIME (Vanilla ES Modules)</text>
+
+        <!-- App State -->
+        <rect x="25" y="50" width="130" height="165" rx="6" fill="#111827" stroke="#374151" stroke-width="1.5"/>
+        <text x="90" y="75" text-anchor="middle" fill="#38bdf8" font-size="12" font-weight="bold">app.js</text>
+        <text x="90" y="95" text-anchor="middle" fill="#9ca3af" font-size="9.5">State Coordinator</text>
+        <line x1="35" y1="105" x2="145" y2="105" stroke="#374151"/>
+        <text x="90" y="125" text-anchor="middle" fill="#2dd4bf" font-size="9.5">Scenario / Stock</text>
+        <text x="90" y="145" text-anchor="middle" fill="#2dd4bf" font-size="9.5">Selected Node ID</text>
+        <text x="90" y="165" text-anchor="middle" fill="#2dd4bf" font-size="9.5">Briefing Status</text>
+        <text x="90" y="195" text-anchor="middle" fill="#f59e0b" font-size="9">district.json</text>
+
+        <line x1="155" y1="100" x2="195" y2="100" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+
+        <!-- Deterministic Core -->
+        <rect x="200" y="45" width="170" height="170" rx="6" fill="#0f172a" stroke="#0d9488" stroke-width="2"/>
+        <text x="285" y="70" text-anchor="middle" fill="#2dd4bf" font-size="12" font-weight="bold">Deterministic Core</text>
+        <text x="285" y="90" text-anchor="middle" fill="#5eead4" font-size="10">engine/scoring.js</text>
+        <text x="285" y="105" text-anchor="middle" fill="#94a3b8" font-size="9">4-Factor Sum (1 dec pl)</text>
+        <text x="285" y="130" text-anchor="middle" fill="#5eead4" font-size="10">engine/allocation.js</text>
+        <text x="285" y="145" text-anchor="middle" fill="#94a3b8" font-size="9">Scaled Demand & Greedy</text>
+        <text x="285" y="170" text-anchor="middle" fill="#5eead4" font-size="10">engine/templatePlan.js</text>
+        <text x="285" y="185" text-anchor="middle" fill="#94a3b8" font-size="9">Instant Fallback Rules</text>
+
+        <!-- Core to UI Components -->
+        <line x1="370" y1="80" x2="410" y2="80" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+        <rect x="415" y="45" width="230" height="90" rx="6" fill="#111827" stroke="#374151" stroke-width="1.5"/>
+        <text x="530" y="68" text-anchor="middle" fill="#38bdf8" font-size="11" font-weight="bold">Synchronized UI Modules</text>
+        <text x="530" y="88" text-anchor="middle" fill="#cbd5e1" font-size="9.5">map.js (Custom SVG & Road Hazards)</text>
+        <text x="530" y="105" text-anchor="middle" fill="#cbd5e1" font-size="9.5">triageTable.js ("Why this ranking?")</text>
+        <text x="530" y="122" text-anchor="middle" fill="#cbd5e1" font-size="9.5">allocationTable.js (Shortfall Badges)</text>
+
+        <!-- Hydration and Guardrail -->
+        <rect x="415" y="145" width="230" height="70" rx="6" fill="#1e1b4b" stroke="#6366f1" stroke-width="1.5"/>
+        <text x="530" y="168" text-anchor="middle" fill="#a5b4fc" font-size="11" font-weight="bold">Guardrail & Hydration</text>
+        <text x="530" y="188" text-anchor="middle" fill="#c7d2fe" font-size="9.5">Checks rank, digit allow-list</text>
+        <text x="530" y="202" text-anchor="middle" fill="#e0e7ff" font-size="9">Hydrates {{c1.food}} placeholders</text>
+
+        <!-- SERVER BOUNDARY -->
+        <rect x="680" y="35" width="115" height="180" rx="6" fill="#090e1a" stroke="#0284c7" stroke-width="2"/>
+        <text x="737" y="60" text-anchor="middle" fill="#38bdf8" font-size="11" font-weight="bold">server.js</text>
+        <text x="737" y="80" text-anchor="middle" fill="#9ca3af" font-size="9">Zero-dep Node</text>
+        <text x="737" y="105" text-anchor="middle" fill="#67e8f9" font-size="9.5">Static Assets</text>
+        <text x="737" y="145" text-anchor="middle" fill="#67e8f9" font-size="9.5">POST /api/brief</text>
+        <text x="737" y="165" text-anchor="middle" fill="#94a3b8" font-size="8.5">Reads .env</text>
+        <text x="737" y="180" text-anchor="middle" fill="#94a3b8" font-size="8.5">Shields Key</text>
+
+        <line x1="645" y1="180" x2="680" y2="180" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+        <line x1="795" y1="150" x2="825" y2="150" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+
+        <!-- External LLM -->
+        <rect x="830" y="70" width="100" height="110" rx="6" fill="#14532d" stroke="#16a34a" stroke-width="1.5"/>
+        <text x="880" y="105" text-anchor="middle" fill="#86efac" font-size="11" font-weight="bold">Fast LLM</text>
+        <text x="880" y="125" text-anchor="middle" fill="#dcfce7" font-size="9">Returns JSON</text>
+        <text x="880" y="140" text-anchor="middle" fill="#bbf7d0" font-size="8.5">Placeholders only</text>
+        <text x="880" y="155" text-anchor="middle" fill="#86efac" font-size="8">Zero raw numbers</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Planned Application File Tree -->
+  <div class="card">
+    <div class="card-title">Annotated Application File Tree</div>
+    <div class="file-tree">
+RescueGrid/
+├── .env.example              # Template with GEMINI_API_KEY= placeholder
+├── .gitignore                # Ignores .env and devpost/learner-profile.md
+├── package.json              # Scripts: "start": "node server.js", "test": "node --test tests/engine.test.js"
+├── server.js                 # Zero-dependency static file server + POST /api/brief proxy
+├── index.html                # EOC Command Console layout & DOM mountpoints
+├── styles/
+│   └── main.css              # Dark EOC theme, grid layout, dual-coded status badges
+├── src/
+│   ├── app.js                # State coordinator & event hub
+│   ├── data/
+│   │   └── district.json     # 8 communities, roads, depot, 2 scenarios
+│   ├── engine/
+│   │   ├── scoring.js        # Deterministic multi-factor scoring formula & tie-breaker
+│   │   ├── allocation.js     # Scaled demand & greedy supply allocation
+│   │   └── templatePlan.js   # Deterministic fallback emergency action plan generator
+│   ├── components/
+│   │   ├── controls.js       # Scenario switcher & supply sliders with unapplied cue
+│   │   ├── map.js            # Custom interactive SVG map with road hazard paths
+│   │   ├── triageTable.js    # Ranked community list & "Why this ranking?" expander
+│   │   ├── allocationTable.js# Resource distribution table & shortfall summary strip
+│   │   └── actionPlan.js     # Action brief display, skeleton loader & badge renderer
+│   └── services/
+│       └── aiBriefing.js     # API client, placeholder hydration & strict validation guardrail
+└── tests/
+    └── engine.test.js        # Node unit tests for scoring sum, ties, and allocation limits
+    </div>
+  </div>
+
+  <!-- Component Specifications -->
+  <div class="card">
+    <div class="card-title">Component Specifications</div>
+    <div class="component-grid">
+      <div class="component-card">
+        <h3>server.js</h3>
+        <div class="component-ref">Serves static assets & proxies API</div>
+        <p>Zero external npm dependencies. Serves HTML/JS/CSS with proper MIME types. Exposes <code>POST /api/brief</code>, injects API key from <code>.env</code>, enforces a 10s timeout, and forwards compact prompt to model.</p>
+      </div>
+
+      <div class="component-card">
+        <h3>src/engine/scoring.js</h3>
+        <div class="component-ref">Implements prd.md > Risk Scoring</div>
+        <p>Computes 4 factor points: Exposure (0–40), Vulnerable Population (0–30), Road Access Penalty (0–20), Depot Distance (0–10). Rounds each factor to 1 decimal place and sums rounded values. Deterministic tie-breaking.</p>
+      </div>
+
+      <div class="component-card">
+        <h3>src/engine/allocation.js</h3>
+        <div class="component-ref">Implements prd.md > Resource Allocation</div>
+        <p>Scales community demand by scenario severity: <code>baseline × (exposure / 40)</code> with a 25% floor. Distributes stock greedy-by-rank. Partial allocation at boundary; residual deficit calculated for each community.</p>
+      </div>
+
+      <div class="component-card">
+        <h3>src/components/map.js</h3>
+        <div class="component-ref">Implements prd.md > Interactive SVG Map</div>
+        <p>Draws vector SVG map: roads styled by status (Open, At Risk, Cut), communities rendered as dual-coded badges (rank + color + icon), central depot marker, and interactive hover tooltips and selection sync.</p>
+      </div>
+
+      <div class="component-card">
+        <h3>src/services/aiBriefing.js</h3>
+        <div class="component-ref">Implements prd.md > Action Brief Guardrail</div>
+        <p>Parses structured JSON response. Replaces variable placeholders (e.g. <code>{{c1.food}}</code>) with verified numbers. Validates rank order and rejects unallowlisted digits before displaying.</p>
+      </div>
+
+      <div class="component-card">
+        <h3>tests/engine.test.js</h3>
+        <div class="component-ref">Automated Verification Suite</div>
+        <p>Runs natively via <code>node --test</code>. Asserts factor breakdown sums match total score, ties resolve consistently, allocations never exceed slider stock, and boundary shortfalls calculate accurately.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Row -->
+  <div class="action-row">
+    <div style="font-size: 0.85rem; color: var(--text-muted);">
+      Canonical Document: <code style="color: #93c5fd;">devpost/spec.md</code> &bull; Companion: <code style="color: #93c5fd;">devpost/spec.html</code>
+    </div>
+    <div style="font-size: 0.85rem; color: #34d399; font-weight: 600;">
+      ✓ Spec Approved
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
