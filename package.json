@@ -2,7 +2,6 @@
   "name": "rescuegrid",
   "version": "1.0.0",
   "description": "Simulated disaster response decision-support console with deterministic triage and verified AI action briefings",
-  "main": "server.js",
   "type": "module",
   "scripts": {
     "start": "node server.js",

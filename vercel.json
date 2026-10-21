@@ -1,9 +1,3 @@
 {
-  "version": 2,
-  "rewrites": [
-    {
-      "source": "/api/brief",
-      "destination": "/api/brief.js"
-    }
-  ]
+  "cleanUrls": true
 }
