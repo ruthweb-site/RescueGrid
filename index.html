@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RescueGrid — District Disaster Response Console</title>
+  <link rel="stylesheet" href="./styles/main.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Top Operational Command Header -->
+  <header class="eoc-header">
+    <div class="header-left">
+      <div class="brand-badge">
+        <span class="radar-dot"></span>
+        <span class="brand-title">RESCUEGRID</span>
+        <span class="brand-subtitle">EOC COMMAND CONSOLE</span>
+      </div>
+      <div id="scenario-active-badge" class="scenario-pill">
+        <span class="pill-label">EVENT:</span>
+        <span id="active-scenario-name" class="pill-val">River Flood Level-4</span>
+      </div>
+    </div>
+
+    <div class="header-center">
+      <div class="simulated-data-banner">
+        <span class="sim-icon">⚠️</span>
+        <span class="sim-text">SIMULATED DATA — FOR OPERATIONAL TRAINING ONLY</span>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <div id="dirty-state-badge" class="dirty-badge hidden">
+        <span class="pulse-amber">●</span> UNAPPLIED CONFIGURATION
+      </div>
+      <div class="system-time" id="system-clock">12:00:00 UTC</div>
+    </div>
+  </header>
+
+  <!-- Main 4-Quadrant Command Surface -->
+  <main class="eoc-workspace">
+    <!-- Top Grid: Controls (Left) | Interactive Map (Center) | Triage & Allocation (Right) -->
+    <div class="workspace-top-grid">
+      
+      <!-- Quadrant 1: Left Control Panel -->
+      <aside class="eoc-panel controls-panel" id="controls-panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span class="panel-icon">⚙</span> SCENARIO & RELIEF STOCKS
+          </div>
+        </div>
+        <div class="panel-body" id="controls-container">
+          <!-- Rendered dynamically by src/components/controls.js -->
+        </div>
+      </aside>
+
+      <!-- Quadrant 2: Center Interactive SVG District Map -->
+      <section class="eoc-panel map-panel" id="map-panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span class="panel-icon">🗺</span> DISTRICT SPATIAL TRIAGE MAP
+          </div>
+          <div class="map-header-tools">
+            <span class="legend-chip legend-open">Solid: Open</span>
+            <span class="legend-chip legend-at-risk">Dash: At Risk</span>
+            <span class="legend-chip legend-cut">Dot: Severed</span>
+          </div>
+        </div>
+        <div class="panel-body map-viewport" id="map-container">
+          <!-- Rendered dynamically by src/components/map.js -->
+          <div id="map-tooltip" class="map-tooltip hidden"></div>
+        </div>
+      </section>
+
+      <!-- Quadrant 3: Right Triage & Allocation Tables -->
+      <section class="eoc-panel triage-panel" id="triage-panel">
+        <div class="panel-header tab-header">
+          <div class="tab-group">
+            <button class="panel-tab active" id="tab-triage">COMMUNITY RISK TRIAGE</button>
+            <button class="panel-tab" id="tab-allocation">RESOURCE ALLOCATION</button>
+          </div>
+        </div>
+        <div class="panel-body tables-body">
+          <div id="triage-table-container" class="table-surface active">
+            <!-- Rendered by src/components/triageTable.js -->
+          </div>
+          <div id="allocation-table-container" class="table-surface hidden">
+            <!-- Rendered by src/components/allocationTable.js -->
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Quadrant 4: Bottom Emergency Action Plan Panel -->
+    <section class="eoc-panel action-plan-panel" id="action-plan-panel">
+      <div class="panel-header action-header">
+        <div class="panel-title">
+          <span class="panel-icon">📋</span> INCIDENT EMERGENCY ACTION PLAN
+        </div>
+        <div id="action-plan-badge" class="plan-status-badge">
+          <!-- Audit status badge rendered here -->
+        </div>
+      </div>
+      <div class="panel-body action-plan-body" id="action-plan-container">
+        <!-- Rendered dynamically by src/components/actionPlan.js -->
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="./src/app.js"></script>
+</body>
+</html>

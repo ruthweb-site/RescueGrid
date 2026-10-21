@@ -9,7 +9,7 @@ Build mode: fast
 
 ## Slices
 
-- [ ] **1. Deterministic Calculation Engines and Unit Tests**
+- [x] **1. Deterministic Calculation Engines and Unit Tests**
   Becomes usable: Core scoring, greedy allocation, and template plan functions run locally and pass automated tests verifying mathematical invariants.
   Why now: The unique kernel is the deterministic boundary. Proving the math, tie-breaking, and shortfall logic with tests first eliminates downstream UI debugging.
   PRD ref: `prd.md > Risk Scoring & "Why This Ranking?" Factor Breakdown` and `prd.md > Priority Resource Allocation & Shortfall Tracking`
@@ -19,7 +19,7 @@ Build mode: fast
   Learner check: Run `npm test` in terminal and inspect test output verifying factor sums match total score.
   Commit: `Implement core scoring, allocation engine, and tests`
 
-- [ ] **2. EOC Command Console Shell, Controls, and Interactive SVG Map**
+- [x] **2. EOC Command Console Shell, Controls, and Interactive SVG Map**
   Becomes usable: A running local web app displaying the full EOC theme (navy/slate/teal, risk scale with icons/labels, tabular numerals, simulated data banner), controls, and custom SVG district map with road hazard styling and tooltips.
   Why now: Establishes the complete visual styling and local HTTP server up front so every later slice renders directly onto the finished look and feel.
   PRD ref: `prd.md > Scenario Selection & Resource Controls`, `prd.md > Interactive SVG District Map`, and `prd.md > Look and Feel`
