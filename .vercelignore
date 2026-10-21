@@ -1,0 +1,4 @@
+# Exclude local server and tests from Vercel deployment
+server.js
+tests/
+devpost/
